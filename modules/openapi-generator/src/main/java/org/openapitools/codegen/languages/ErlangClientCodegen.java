@@ -132,7 +132,7 @@ public class ErlangClientCodegen extends DefaultCodegen implements CodegenConfig
 
     @Override
     public String getTypeDeclaration(String name) {
-        return name + ":" + name + "()";
+        return name + ":type()";
     }
 
     @Override
@@ -361,6 +361,16 @@ public class ErlangClientCodegen extends DefaultCodegen implements CodegenConfig
         }
         operations.put("operation", newOs);
         return objs;
+    }
+
+    @Override
+    public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
+        if (property.complexType != null && property.complexType.endsWith(":type()")) {
+            int end = property.complexType.indexOf(":type()");
+            property.complexType = property.complexType.substring(0, end);
+        } else {
+            property.complexType = null;
+        }
     }
 
     public void setPackageName(String packageName) {
