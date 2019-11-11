@@ -43,6 +43,8 @@ public class ErlangClientCodegen extends DefaultCodegen implements CodegenConfig
     protected String packageVersion = "1.0.0";
     protected String sourceFolder = "src";
 
+    final private static Pattern ERLANG_ATOM = Pattern.compile("[a-z][a-zA-Z0-9_]*");
+
     public CodegenType getTag() {
         return CodegenType.CLIENT;
     }
@@ -190,6 +192,13 @@ public class ErlangClientCodegen extends DefaultCodegen implements CodegenConfig
             }
         });
 
+        additionalProperties.put("atomize", new Mustache.Lambda() {
+            @Override
+            public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+                writer.write(atomize(fragment.execute()));
+            }
+        });
+
         modelPackage = packageName;
         apiPackage = packageName;
 
@@ -210,6 +219,16 @@ public class ErlangClientCodegen extends DefaultCodegen implements CodegenConfig
             }
         }
         return r;
+    }
+
+    public String atomize(String text) {
+        String atom = underscore(camelize(sanitizeName(text)));
+
+        if (!ERLANG_ATOM.matcher(atom).matches()) {
+            atom = "'" + atom + "'";
+        }
+
+        return atom;
     }
 
     @Override
